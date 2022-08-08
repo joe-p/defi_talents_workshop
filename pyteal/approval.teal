@@ -1,0 +1,106 @@
+#pragma version 6
+txn ApplicationID
+int 0
+==
+bnz main_l8
+txna ApplicationArgs 0
+byte "bid"
+==
+bnz main_l5
+txna ApplicationArgs 0
+byte "start_auction"
+==
+bnz main_l4
+err
+main_l4:
+txn Sender
+byte "owner"
+app_global_get
+==
+assert
+txn GroupIndex
+int 1
++
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+txn GroupIndex
+int 1
++
+gtxns Amount
+int 100000
+>=
+assert
+byte "auctionEnd"
+txna ApplicationArgs 1
+btoi
+app_global_put
+b main_l9
+main_l5:
+global LatestTimestamp
+byte "auctionEnd"
+app_global_get
+<
+assert
+txn GroupIndex
+int 1
++
+gtxns Sender
+txn Sender
+==
+assert
+txn GroupIndex
+int 1
++
+gtxns Amount
+byte "highestBid"
+app_global_get
+>
+assert
+byte "highestBidder"
+app_global_get
+byte ""
+!=
+bnz main_l7
+main_l6:
+byte "highestBidder"
+txn Sender
+app_global_put
+byte "highestBid"
+txn GroupIndex
+int 1
++
+gtxns Amount
+app_global_put
+b main_l9
+main_l7:
+itxn_begin
+int pay
+itxn_field TypeEnum
+byte "highestBidder"
+app_global_get
+itxn_field Receiver
+byte "highestBid"
+app_global_get
+global MinTxnFee
+-
+itxn_field Amount
+itxn_submit
+b main_l6
+main_l8:
+byte "owner"
+txn Sender
+app_global_put
+byte "highestBid"
+int 0
+app_global_put
+byte "highestBidder"
+byte ""
+app_global_put
+byte "auctionEnd"
+int 0
+app_global_put
+main_l9:
+int 1
+return
