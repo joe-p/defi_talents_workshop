@@ -25,7 +25,7 @@ async function getBidTxns (from: string, amount: number) {
 
   const accounts = [] as Array<string>
 
-  if (highestBidder) {
+  if (highestBidder.address) {
     accounts.push(highestBidder.address)
   }
 
